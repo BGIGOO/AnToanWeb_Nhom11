@@ -1,0 +1,18 @@
+# File: .gitignore
+
+# Môi trường ảo
+venv/
+
+# File môi trường (CỰC KỲ QUAN TRỌNG)
+.env
+
+# Thư mục cache của Python
+__pycache__/
+*.pyc
+
+# Thư mục media/static (nếu có)
+/media/
+/static/
+
+# Các file hệ thống
+.DS_Store
