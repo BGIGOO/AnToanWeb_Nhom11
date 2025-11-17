@@ -126,9 +126,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 AUTH_USER_MODEL = 'users.NguoiDung'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Sau khi ĐĂNG NHẬP, chuyển đến view tên là 'redirect_after_login'
+LOGIN_REDIRECT_URL = 'redirect_after_login'
+
+# Sau khi ĐĂNG XUẤT, chuyển về trang chủ
+LOGOUT_REDIRECT_URL = 'public:trang_chu'

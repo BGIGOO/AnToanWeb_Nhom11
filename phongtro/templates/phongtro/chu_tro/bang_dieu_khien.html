@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng điều khiển Chủ Trọ</title>
+</head>
+<body>
+    <h1>Hello, đây là trang cho chủ trọ</h1>
+    <p>
+        Bạn thấy được trang này vì bạn là Role 2 (Chủ trọ).
+    </p>
+    <p>
+        Người dùng Role 1 (Admin) và Role 3 (Khách hàng) sẽ bị cấm (403 Forbidden).
+    </p>
+    <hr>
+    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" style="background:none;border:none;color:#2563eb;cursor:pointer;">
+          Đăng xuất
+      </button>
+    </form>
+</body>
+</html>

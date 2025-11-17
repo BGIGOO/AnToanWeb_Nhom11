@@ -73,7 +73,13 @@ class NguoiDung(AbstractUser):
         default=VaiTro.KHACH_HANG
     )
     
-    avatar_url = models.CharField(max_length=255, blank=True, null=True)
+    avatar = models.ImageField(
+        _('avatar'),
+        upload_to='avatars/', # Sẽ lưu vào media/avatars/
+        blank=True, 
+        null=True
+    )
+    
     ngay_sinh = models.DateField(blank=True, null=True)
     
     # --- TRƯỜNG GIỚI TÍNH ĐÃ ĐƯỢC THÊM CHÍNH XÁC ---

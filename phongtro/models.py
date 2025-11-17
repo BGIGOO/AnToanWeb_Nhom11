@@ -44,7 +44,7 @@ class DanhMuc(models.Model):
 class TienIch(models.Model):
     # 'tien_ich_id'
     ten = models.CharField(max_length=100, null=False)
-    icon_url = models.CharField(max_length=255, blank=True, null=True)
+    icon = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.ten
@@ -52,7 +52,7 @@ class TienIch(models.Model):
 class DoiTuong(models.Model):
     # 'doi_tuong_id'
     ten = models.CharField(max_length=100, null=False)
-    icon_url = models.CharField(max_length=255, blank=True, null=True)
+    icon = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.ten
@@ -115,7 +115,7 @@ class TinDang(models.Model):
 class AnhTinDang(models.Model):
     # 'anh_id'
     tin_dang_id = models.ForeignKey(TinDang, on_delete=models.CASCADE, related_name='cac_anh')
-    image_url = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='tin_dang/')
     la_anh_dai_dien = models.BooleanField(default=False)
 
     def __str__(self):

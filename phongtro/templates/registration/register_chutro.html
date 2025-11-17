@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Chủ Trọ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .form-label { color: #5f6c7b; }
+        .form-input { border-color: #90b4ce; }
+        .form-error { color: #ef4565; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'background': '#fffffe',
+                        'headline': '#094067',
+                        'paragraph': '#5f6c7b',
+                        'button': '#3da9fc',
+                        'button-text': '#fffffe',
+                        'stroke': '#094067',
+                        'main': '#fffffe',
+                        'highlight': '#3da9fc',
+                        'secondary': '#90b4ce',
+                        'tertiary': '#ef4565',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
+
+    <div class="bg-background w-full max-w-lg p-8 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-headline text-center mb-6">Đăng ký Tài khoản Chủ Trọ</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Hiển thị lỗi chung của Form -->
+            {% if form.non_field_errors %}
+                <div class="bg-tertiary/20 text-tertiary p-3 rounded-lg mb-4">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Form được render tự động bằng {{ form.as_p }} -->
+            <!-- Hoặc render bằng tay để đẹp hơn -->
+            
+            <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}" class="form-label block text-sm font-medium mb-2">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="form-error text-sm mt-1">{{ form.email.errors|first }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label for="{{ form.ho_ten.id_for_label }}" class="form-label block text-sm font-medium mb-2">Họ tên</label>
+                {{ form.ho_ten }}
+                {% if form.ho_ten.errors %}
+                    <p class="form-error text-sm mt-1">{{ form.ho_ten.errors|first }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label for="{{ form.so_dien_thoai.id_for_label }}" class="form-label block text-sm font-medium mb-2">Số điện thoại</label>
+                {{ form.so_dien_thoai }}
+                {% if form.so_dien_thoai.errors %}
+                    <p class="form-error text-sm mt-1">{{ form.so_dien_thoai.errors|first }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="mb-4 md:mb-0">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label block text-sm font-medium mb-2">Mật khẩu</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <p class="form-error text-sm mt-1">{{ form.password1.errors|first }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.password2.id_for_label }}" class="form-label block text-sm font-medium mb-2">Xác nhận Mật khẩu</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <p class="form-error text-sm mt-1">{{ form.password2.errors|first }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CSS cho các trường input bị thiếu -->
+            <style>
+                #id_email, #id_ho_ten, #id_so_dien_thoai, #id_password1, #id_password2 {
+                    width: 100%;
+                    padding: 0.5rem 1rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid;
+                    border-color: #90b4ce; /* secondary */
+                }
+                #id_email:focus, #id_ho_ten:focus, #id_so_dien_thoai:focus, #id_password1:focus, #id_password2:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 2px #3da9fc; /* highlight */
+                }
+            </style>
+            
+            <button 
+                type="submit" 
+                class="w-full bg-button text-button-text py-3 rounded-lg font-semibold text-lg transition-transform hover:scale-105"
+            >
+                Đăng ký
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
