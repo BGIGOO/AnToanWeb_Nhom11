@@ -77,7 +77,8 @@ class NguoiDung(AbstractUser):
         _('avatar'),
         upload_to='avatars/', # Sẽ lưu vào media/avatars/
         blank=True, 
-        null=True
+        null=True,
+        default="avatars/default.png"
     )
     
     ngay_sinh = models.DateField(blank=True, null=True)

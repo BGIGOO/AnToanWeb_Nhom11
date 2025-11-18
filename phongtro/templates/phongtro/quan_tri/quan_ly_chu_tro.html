@@ -1,0 +1,75 @@
+{% extends 'phongtro/quan_tri/base.html' %}
+
+{% block title %}Quản lý Chủ trọ{% endblock %}
+
+{% block header_title %}Quản lý Chủ trọ{% endblock %}
+
+{% block content %}
+<div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+    <table class="w-full text-left min-w-[900px]">
+        <thead class="border-b-2 border-gray-200">
+            <tr>
+                <th class="py-3 px-4 w-12 font-semibold text-headline">STT</th>
+                <th class="py-3 px-4 font-semibold text-headline">Họ tên</th>
+                <th class="py-3 px-4 font-semibold text-headline">Email</th>
+                <th class="py-3 px-4 font-semibold text-headline">Điện thoại</th>
+                <th class="py-3 px-4 font-semibold text-headline">Ngày sinh</th>
+                <th class="py-3 px-4 font-semibold text-headline">Giới tính</th>
+                <th class="py-3 px-4 font-semibold text-headline">Trạng thái</th>
+                <th class="py-3 px-4 font-semibold text-headline text-right">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chu_tro in ds_chu_tro %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                
+                <td class="py-3 px-4 text-paragraph">{{ forloop.counter }}</td>
+
+                <td class="py-3 px-4 text-paragraph">
+                    <div class="flex items-center space-x-3">
+                        
+                        <img class="h-10 w-10 rounded-full object-cover" 
+                             src="{{ chu_tro.avatar.url }}" 
+                             alt="Avatar của {{ chu_tro.ho_ten }}">
+                        
+                        <span>{{ chu_tro.ho_ten }}</span>
+                    </div>
+                </td>
+                
+                <td class="py-3 px-4 text-paragraph">{{ chu_tro.email }}</td>
+                <td class="py-3 px-4 text-paragraph">{{ chu_tro.so_dien_thoai }}</td>
+                
+                <td class="py-3 px-4 text-paragraph">
+                    {{ chu_tro.ngay_sinh|date:"d/m/Y"|default:"--" }}
+                </td>
+                
+                <td class="py-3 px-4 text-paragraph">
+                    {{ chu_tro.get_gioi_tinh_display|default:"--" }}
+                </td>
+                
+                <td class="py-3 px-4">
+                    {% if chu_tro.is_active %}
+                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            Đang Kích hoạt
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-tertiary/20 text-tertiary">
+                            Đã Hủy
+                        </span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-4 text-right">
+                    <a href="{% url 'quan_tri:sua_chu_tro' pk=chu_tro.pk %}" class="text-highlight hover:underline font-medium">
+                        Sửa
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="py-4 px-4 text-center text-paragraph">Chưa có chủ trọ nào.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

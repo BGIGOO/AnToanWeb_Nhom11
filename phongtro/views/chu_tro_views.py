@@ -4,7 +4,7 @@ from phongtro.decorators import chutro_required # Dùng "hàng rào"
 
 # View này CHỈ chứa logic cho Chủ Trọ
 @chutro_required # <-- "Hàng rào" cấm Role 1 và 3
-@login_required
+@login_required  
 def bang_dieu_khien_view(request):
     """
     View cho trang Bảng điều khiển của Chủ trọ (Role 2).

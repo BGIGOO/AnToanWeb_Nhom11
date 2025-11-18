@@ -1,53 +1,26 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng điều khiển Quản Trị</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ... (Tất cả code <style> và <script> config tailwind) ... -->
-</head>
-<body class="bg-background text-paragraph">
-    <div class="flex h-screen">
-        <!-- ===== Sidebar ===== -->
-        <aside class="w-64 bg-main p-6 shadow-lg hidden md:block">
-            <div class="mb-8 text-center">
-                <a href="{% url 'quan_tri:bang_dieu_khien_goc' %}" class="text-2xl font-bold text-headline">
-                    Admin Dashboard
-                </a>
-            </div>
-            <nav>
-                <ul class="space-y-2">
-                    <li>
-                        <a href="{% url 'quan_tri:bang_dieu_khien_goc' %}" class="flex items-center space-x-3 text-button-text bg-highlight rounded-lg p-3 font-medium">
-                            <span>Tổng quan</span>
-                        </a>
-                    </li>
-                    <!-- ... (Các link khác) ... -->
-                </ul>
-            </nav>
-            <div class="absolute bottom-6 left-6">
-                <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" style="background:none;border:none;color:#2563eb;cursor:pointer;">
-                            Đăng xuất
-                        </button>
-                </form>
-            </div>
-        </aside>
-        <!-- ===== /Sidebar ===== -->
+{% extends 'phongtro/quan_tri/base.html' %}
 
-        <!-- ===== Main Content ===== -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- ... (Header và Main content của bạn) ... -->
-             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                <h1 class="text-3xl font-bold text-headline">
-                    Chào mừng, {{ user.ho_ten|default:user.email }}!
-                </h1>
-                <p class="text-paragraph">Đây là trang quản lý nghiệp vụ của bạn.</p>
-            </main>
-        </div>
-        <!-- ===== /Main Content ===== -->
+{% block title %}Bảng điều khiển{% endblock %}
+
+{% block header_title %}TỔNG QUAN{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-headline mb-2">Tin Chờ Duyệt</h3>
+        <p class="text-5xl font-bold text-highlight">12</p> <p class="text-paragraph mt-1">Tin đăng mới đang chờ bạn phê duyệt.</p>
     </div>
-</body>
-</html>
+
+    <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-headline mb-2">Báo Cáo Mới</h3>
+        <p class="text-5xl font-bold text-tertiary">3</p> <p class="text-paragraph mt-1">Báo cáo vi phạm cần được xử lý.</p>
+    </div>
+
+    <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-headline mb-2">Người Dùng Mới (24h)</h3>
+        <p class="text-5xl font-bold text-secondary">25</p> <p class="text-paragraph mt-1">Người dùng mới đăng ký hôm nay.</p>
+    </div>
+
+</div>
+{% endblock %}
