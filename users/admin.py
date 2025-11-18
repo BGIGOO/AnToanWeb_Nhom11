@@ -19,7 +19,7 @@ class NguoiDungAdmin(UserAdmin):
         (None, {"fields": ("email", "password")}),
         ("Thông tin cá nhân", {
             "fields": ("ho_ten", "so_dien_thoai", "so_zalo",
-                       "avatar_url", "ngay_sinh", "gioi_tinh"),
+                       "avatar", "ngay_sinh", "gioi_tinh"),
         }),
         ("Phân quyền", {
             "fields": ("vai_tro", "is_active", "is_staff",

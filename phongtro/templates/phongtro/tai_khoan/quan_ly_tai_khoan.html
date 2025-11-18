@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'background': '#fffffe', 'headline': '#094067', 'paragraph': '#5f6c7b',
+                        'button': '#3da9fc', 'button-text': '#fffffe', 'stroke': '#094067',
+                        'main': '#fffffe', 'highlight': '#3da9fc', 'secondary': '#90b4ce', 'tertiary': '#ef4565',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS bổ sung để reset các style mặc định của input file */
+        input[type="file"] {
+            cursor: pointer;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 font-sans">
+    <div class="container mx-auto px-4 max-w-4xl"> <div class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-bold text-headline">Hồ sơ cá nhân</h1>
+            <a href="{% url 'redirect_after_login' %}" class="group flex items-center text-paragraph hover:text-highlight transition-colors font-medium">
+                <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Quay về Bảng điều khiển
+            </a>
+        </div>
+
+        <div class="bg-main p-8 rounded-xl shadow-lg border border-gray-100">
+            
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg text-sm font-medium flex items-center
+                        {% if message.tags == 'success' %} bg-green-50 text-green-700 border border-green-200
+                        {% else %} bg-red-50 text-red-700 border border-red-200 {% endif %}">
+                        {% if message.tags == 'success' %}
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        {% else %}
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                    
+                    <div class="md:col-span-4 flex flex-col items-center space-y-4 pt-4">
+                        <div class="relative group">
+                            <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm ring-2 ring-highlight/20">
+                                {% if user.avatar %}
+                                    <img class="w-full h-full object-cover" 
+                                         src="{{ user.avatar.url }}" 
+                                         alt="Avatar">
+                                {% else %}
+                                    <div class="w-full h-full bg-blue-50 flex items-center justify-center text-highlight">
+                                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="absolute bottom-2 right-2 bg-highlight text-white p-2 rounded-full shadow-md border-2 border-white">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                        </div>
+
+                        <div class="w-full max-w-[200px]">
+                            {{ form.avatar }}
+                            <p class="text-xs text-paragraph text-center mt-2">
+                                Hỗ trợ: JPG, PNG (Tối đa 2MB)
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-8 space-y-5">
+                        {% for field in form %}
+                            {% if field.name != 'avatar' %}
+                            <div>
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-headline mb-1.5">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <p class="text-tertiary text-xs mt-1 pl-1 flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                        {{ field.errors|first }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="flex items-center justify-between pt-4">
+                            <a href="{% url 'tai_khoan:doi_mat_khau' %}" class="text-highlight text-sm font-medium hover:underline hover:text-blue-600 transition-colors">
+                                Đổi mật khẩu?
+                            </a>
+                            
+                            <button type="submit" class="bg-button text-button-text px-8 py-2.5 rounded-lg font-bold shadow-md hover:bg-highlight hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                                Cập nhật Hồ sơ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

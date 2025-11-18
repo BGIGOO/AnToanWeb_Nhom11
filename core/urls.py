@@ -35,6 +35,7 @@ urlpatterns = [
 
     # F. Trang chủ & Công khai (Role 3) - Phải đặt cuối cùng
     path('', include('phongtro.urls.public_urls')),
+    path('quan_ly_tai_khoan/', include('phongtro.urls.tai_khoan_urls')),
 ]
 
 # --- Phục vụ file media (Đã có từ Bước 1) ---

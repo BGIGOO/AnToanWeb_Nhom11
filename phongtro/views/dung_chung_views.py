@@ -10,7 +10,7 @@ def redirect_after_login_view(request):
     """
     
     # Role 1: Admin Nghiệp vụ (is_staff)
-    if request.user.is_staff & request.user.is_superuser==False:
+    if request.user.is_staff and not request.user.is_superuser:
         # Dùng URL namespace: 'app_name:url_name'
         return redirect('quan_tri:bang_dieu_khien_goc') 
 

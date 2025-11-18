@@ -31,3 +31,28 @@ def chutro_required(function):
             return HttpResponseForbidden("Bạn không có quyền truy cập trang này. (Chỉ dành cho Chủ Trọ)")
 
     return _wrapped_view
+
+def quantri_required(function):
+    """
+    Decorator dành cho Admin Nghiệp Vụ:
+    - Chưa đăng nhập -> redirect đến trang Login
+    - Đăng nhập nhưng KHÔNG phải staff hoặc là superuser -> 403
+    - is_staff = True và is_superuser = False -> cho vào
+    """
+    @wraps(function)
+    def _wrapped_view(request, *args, **kwargs):
+
+        # Chưa login -> chuyển đến trang login
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+
+        # Chỉ cho phép:
+        #   is_staff = True
+        #   is_superuser = False
+        if request.user.is_staff and not request.user.is_superuser:
+            return function(request, *args, **kwargs)
+
+        # Còn lại -> cấm
+        return HttpResponseForbidden("Bạn không có quyền truy cập trang này. (Chỉ dành cho Admin nghiệp vụ)")
+
+    return _wrapped_view

@@ -20,5 +20,14 @@
           Đăng xuất
       </button>
     </form>
+    <a href="{% url 'tai_khoan:quan_ly_tai_khoan' %}" 
+        class="flex items-center space-x-3 rounded-lg p-3 font-medium transition-colors
+          {% if request.resolver_match.url_name == 'quan_ly_tai_khoan' or request.resolver_match.url_name == 'doi_mat_khau' %}
+              bg-highlight text-button-text
+          {% else %}
+              text-paragraph hover:bg-gray-100
+          {% endif %}">
+    <span>Quản lý tài khoản</span>
+</a>
 </body>
 </html>
