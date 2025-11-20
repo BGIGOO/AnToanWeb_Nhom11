@@ -1,0 +1,219 @@
+{% extends 'phongtro/quan_tri/base.html' %}
+
+{% block title %}Chi tiết tin: {{ tin.tieu_de }}{% endblock %}
+
+{% block header_title %}Chi tiết tin đăng{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    
+    <!-- Nút quay lại -->
+    <div class="mb-4">
+        <a href="{% url 'quan_tri:quan_ly_tin_dang' %}" class="text-paragraph hover:text-highlight flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- CỘT TRÁI: NỘI DUNG TIN -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- 1. Hình ảnh Slider (Giả lập hiển thị grid ảnh) -->
+            <div class="bg-main p-4 rounded-lg shadow-sm border border-gray-200">
+                <h3 class="font-semibold text-headline mb-3">Hình ảnh thực tế</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {% for anh in tin.cac_anh.all %}
+                        <div class="relative h-32 rounded-lg overflow-hidden border border-gray-200 group">
+                            <img src="{{ anh.image.url }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Ảnh phòng trọ">
+                            {% if anh.la_anh_dai_dien %}
+                                <span class="absolute bottom-0 left-0 bg-highlight text-white text-xs px-2 py-1">Đại diện</span>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-400 col-span-3 text-center py-4">Tin này chưa có ảnh nào.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 2. Thông tin chính -->
+            <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200">
+                <h1 class="text-2xl font-bold text-headline mb-2">{{ tin.tieu_de }}</h1>
+                <div class="flex items-center text-paragraph text-sm mb-4">
+                    <svg class="w-4 h-4 mr-1 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    {{ tin.dia_chi_chi_tiet }}, {{ tin.phuong_xa_id.ten }}, {{ tin.quan_huyen_id.ten }}, {{ tin.tinh_id.ten }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <span class="block text-sm text-gray-500">Giá thuê</span>
+                        <span class="text-xl font-bold text-highlight">{{ tin.gia_moi_thang|floatformat:0 }} đ/tháng</span>
+                    </div>
+                    <div>
+                        <span class="block text-sm text-gray-500">Diện tích</span>
+                        <span class="text-xl font-bold text-headline">{{ tin.dien_tich_m2 }} m²</span>
+                    </div>
+                    <div>
+                        <span class="block text-sm text-gray-500">Danh mục</span>
+                        <span class="font-medium">{{ tin.danh_muc_id.ten }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-sm text-gray-500">Ngày đăng</span>
+                        <span class="font-medium">{{ tin.ngay_tao|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold text-headline mb-2">Mô tả chi tiết</h3>
+                    <p class="text-paragraph whitespace-pre-line leading-relaxed">
+                        {{ tin.mo_ta|default:"(Không có mô tả)" }}
+                    </p>
+                </div>
+
+                <!-- Tiện ích -->
+                <div>
+                    <h3 class="font-semibold text-headline mb-2">Tiện ích</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tien_ich in tin.tien_ich.all %}
+                            <span class="px-3 py-1 bg-blue-50 text-button text-sm rounded-full border border-blue-100 flex items-center">
+                                {% if tien_ich.icon %}
+                                    <i class="{{ tien_ich.icon }} mr-2"></i> <!-- Giả sử dùng FontAwesome -->
+                                {% endif %}
+                                {{ tien_ich.ten }}
+                            </span>
+                        {% empty %}
+                            <span class="text-gray-400 text-sm">Không có tiện ích nào.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Đối tượng -->
+                <div class="mt-6 pt-4  border-gray-100">
+                    <h3 class="font-semibold text-headline mb-2">Đối tượng phù hợp</h3> 
+                    <div class="flex flex-wrap gap-2">
+                        {% for doi_tuong in tin.doi_tuong.all %}
+                            <span class="px-3 py-1 bg-purple-50 text-purple-700 text-sm rounded-full border border-purple-100 flex items-center">
+                                {% if doi_tuong.icon %}
+                                    <i class="{{ doi_tuong.icon }} mr-2"></i> {% endif %}
+                                {{ doi_tuong.ten }}
+                            </span>
+                        {% empty %}
+                            <span class="text-gray-400 text-sm">Không giới hạn hoặc chưa được chỉ định.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: THÔNG TIN CHỦ TRỌ & HÀNH ĐỘNG -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- 1. Panel Hành động Duyệt -->
+            <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200 sticky top-6">
+                <h3 class="font-semibold text-headline mb-4 border-b pb-2">Hành động Quản trị</h3>
+                
+                <!-- Trạng thái hiện tại -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-paragraph">Trạng thái Duyệt:</span>
+                        {% if tin.trang_thai_duyet %}
+                            <span class="px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-800">ĐÃ DUYỆT</span>
+                        {% else %}
+                            <span class="px-2 py-1 text-xs font-bold rounded bg-yellow-100 text-yellow-800">CHỜ DUYỆT</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-paragraph">Hiển thị:</span>
+                        {% if tin.hoat_dong %}
+                            <span class="text-green-600 font-medium text-sm">Đang Hiện</span>
+                        {% else %}
+                            <span class="text-gray-400 font-medium text-sm">Đang Ẩn</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Các nút bấm (Sẽ submit form POST) -->
+                <form method="POST" action="{% url 'quan_tri:duyet_tin_dang' pk=tin.pk %}">
+                    {% csrf_token %}
+                    
+                    {% if not tin.trang_thai_duyet %}
+                        <button type="submit" name="action" value="duyet" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold mb-3 shadow-md transition-transform active:scale-95 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            DUYỆT TIN NÀY
+                        </button>
+                    {% else %}
+                        <button type="submit" name="action" value="go_duyet" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium mb-3 transition-colors">
+                            Gỡ Duyệt (Chuyển về Chờ)
+                        </button>
+                    {% endif %}
+
+                    {% if tin.hoat_dong %}
+                         <button type="submit" name="action" value="an_tin" class="w-full bg-gray-200 hover:bg-gray-300 text-paragraph py-2 rounded-lg font-medium mb-3 transition-colors">
+                            Ẩn Tin Đăng
+                        </button>
+                    {% else %}
+                         <button type="submit" name="action" value="hien_tin" class="w-full bg-blue-100 hover:bg-blue-200 text-button py-2 rounded-lg font-medium mb-3 transition-colors">
+                            Hiện Tin Đăng
+                        </button>
+                    {% endif %}
+                    
+                    <hr class="my-4 border-gray-200">
+                    
+                    <button type="button" onclick="confirmDelete()" class="w-full border border-tertiary text-tertiary hover:bg-tertiary hover:text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Xóa Vĩnh Viễn
+                    </button>
+                </form>
+            </div>
+
+            <!-- 2. Thông tin người đăng -->
+<div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200">
+    <h3 class="font-semibold text-headline mb-4">Thông tin người đăng</h3>
+    
+    {% with chu_tro=tin.chu_tro_id %}
+    
+    {% if chu_tro %} <div class="flex items-center mb-4">
+            {% if chu_tro.avatar %}
+                <img src="{{ chu_tro.avatar.url }}" class="w-12 h-12 rounded-full object-cover mr-3" alt="Avatar">
+            {% else %}
+                <div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-white font-bold mr-3 text-lg">
+                    {{ chu_tro.ho_ten|first|upper }}
+                </div>
+            {% endif %}
+            <div>
+                <div class="font-bold text-headline">{{ chu_tro.ho_ten }}</div>
+                <div class="text-sm text-paragraph">Mail: {{ chu_tro.email }}</div>
+                <div class="text-sm text-paragraph">Phone: {{ chu_tro.so_dien_thoai }}</div>
+                <div class="text-sm text-paragraph">Zalo: {{ chu_tro.so_dien_thoai }}</div>
+            </div>
+        </div>
+        
+        <div class="space-y-2 text-sm">
+            </div>
+        
+        <div class="mt-4">
+             <a href="{% url 'quan_tri:sua_chu_tro' pk=chu_tro.pk %}" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-paragraph py-2 rounded-md text-sm font-medium transition-colors">
+                Xem hồ sơ chủ trọ
+            </a>
+        </div>
+    {% else %}
+        <p class="text-tertiary">Lỗi: Không tìm thấy hồ sơ chủ trọ cho tin đăng này (ID rỗng).</p>
+    {% endif %}
+    {% endwith %}
+    
+</div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa vĩnh viễn tin đăng này không? Hành động này không thể hoàn tác!')) {
+            // Logic gọi form xóa (có thể thêm input hidden để xử lý xóa)
+            alert('Chức năng xóa đang được phát triển ở Backend.');
+        }
+    }
+</script>
+{% endblock %}

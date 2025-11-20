@@ -1,19 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages 
-from phongtro.forms.quan_tri_forms import ChuTroChangeForm, KhachHangChangeForm
-from phongtro.decorators import quantri_required
-from users.models import NguoiDung
-
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.contrib import messages
 from django.db.models import Q
 
 from users.models import NguoiDung
-from phongtro.forms.quan_tri_forms import ChuTroChangeForm # Giả sử bạn đã tách KhachHangChangeForm nếu cần
-    # from phongtro.forms.quan_tri_forms import KhachHangChangeForm # Uncomment nếu đã có
-from phongtro.decorators import quantri_required # Giả sử bạn đã đổi tên decorator
+from phongtro.models import TinDang
+from phongtro.forms.quan_tri_forms import ChuTroChangeForm
+    # from phongtro.forms.quan_tri_forms import KhachHangChangeForm
+from phongtro.decorators import quantri_required
 
 # ---
 # Hàm này đã có (để chạy Bảng điều khiển)
@@ -183,17 +178,133 @@ def sua_khach_hang_view(request, pk):
     )
 
     if request.method == 'POST':
-        form = KhachHangChangeForm(request.POST, instance=khach_hang)
+        # Tái sử dụng ChuTroChangeForm vì logic giống nhau (Sửa thông tin cơ bản)
+        # Hoặc dùng KhachHangChangeForm nếu bạn đã tạo riêng
+        form = ChuTroChangeForm(request.POST, instance=khach_hang)
         if form.is_valid():
             form.save()
             messages.success(request, f"Cập nhật khách hàng {khach_hang.ho_ten} thành công.")
             return redirect('quan_tri:quan_ly_khach_hang')
     else:
-        form = KhachHangChangeForm(instance=khach_hang)
+        form = ChuTroChangeForm(instance=khach_hang)
 
     context = {
         'user': request.user,
         'form': form,
         'khach_hang': khach_hang,
     }
+    # Bạn cần tạo template sua_khach_hang.html tương tự sua_chu_tro.html
+    # Hoặc dùng chung template nếu muốn tối giản
     return render(request, 'phongtro/quan_tri/sua_khach_hang.html', context)
+
+@quantri_required
+def quan_ly_tin_dang_view(request):
+    """
+    Quản lý toàn bộ tin đăng: Lọc theo từ khóa, trạng thái duyệt, trạng thái hiển thị.
+    """
+    # SỬA LỖI N+1: Thêm select_related('chu_tro') để tải thông tin chủ trọ ngay lập tức
+    ds_tin_dang = TinDang.objects.select_related('chu_tro_id').order_by('-ngay_tao') 
+
+    # --- Lấy tham số lọc MỚI ---
+    tim_tieu_de = request.GET.get('tim_tieu_de', '').strip()
+    tim_chu_tro = request.GET.get('tim_chu_tro', '').strip()
+    tim_dia_chi = request.GET.get('tim_dia_chi', '').strip()
+    loc_trang_thai = request.GET.get('loc_trang_thai', '').strip()
+
+    # 1. Lọc theo Tiêu đề
+    if tim_tieu_de:
+        ds_tin_dang = ds_tin_dang.filter(tieu_de__icontains=tim_tieu_de)
+
+    # 2. Lọc theo Tên chủ trọ
+    if tim_chu_tro:
+        ds_tin_dang = ds_tin_dang.filter(chu_tro_id__ho_ten__icontains=tim_chu_tro)
+
+    # 3. Lọc theo Địa chỉ (Tìm trong cả địa chỉ chi tiết và tên Quận/Huyện)
+    if tim_dia_chi:
+        ds_tin_dang = ds_tin_dang.filter(
+            Q(dia_chi_chi_tiet__icontains=tim_dia_chi) |
+            Q(quan_huyen__ten__icontains=tim_dia_chi) |
+            Q(phuong_xa__ten__icontains=tim_dia_chi)
+        )
+
+    # 4. Lọc theo Trạng thái Duyệt
+    if loc_trang_thai == 'da_duyet':
+        ds_tin_dang = ds_tin_dang.filter(trang_thai_duyet=True)
+    elif loc_trang_thai == 'cho_duyet':
+        ds_tin_dang = ds_tin_dang.filter(trang_thai_duyet=False)
+
+    context = {
+        'user': request.user,
+        'ds_tin_dang': ds_tin_dang,
+        # Truyền lại giá trị lọc để giữ state trên giao diện
+        'tim_tieu_de': tim_tieu_de,
+        'tim_chu_tro': tim_chu_tro,
+        'tim_dia_chi': tim_dia_chi,
+        'loc_trang_thai': loc_trang_thai,
+    }
+    return render(request, 'phongtro/quan_tri/quan_ly_tin_dang.html', context)
+
+@quantri_required
+def chi_tiet_tin_dang_view(request, pk):
+    """
+    Xem chi tiết một tin đăng để quyết định duyệt.
+    """
+    tin = get_object_or_404(TinDang, pk=pk)
+    
+    context = {
+        'user': request.user,
+        'tin': tin,
+    }
+    return render(request, 'phongtro/quan_tri/chi_tiet_tin_dang.html', context)
+
+@quantri_required
+def duyet_tin_dang_view(request, pk):
+    """
+    Xử lý các nút bấm Duyệt, Gỡ duyệt, Ẩn tin, Hiện tin.
+    Chỉ chấp nhận phương thức POST.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    tin = get_object_or_404(TinDang, pk=pk)
+    action = request.POST.get('action')
+
+    if action == 'duyet':
+        tin.trang_thai_duyet = True
+        tin.save()
+        messages.success(request, f"Đã duyệt tin: {tin.tieu_de}")
+        
+    elif action == 'go_duyet':
+        tin.trang_thai_duyet = False
+        tin.save()
+        messages.warning(request, f"Đã gỡ duyệt tin: {tin.tieu_de}")
+        
+    elif action == 'an_tin':
+        tin.hoat_dong = False
+        tin.save()
+        messages.warning(request, f"Đã ẩn tin: {tin.tieu_de}")
+        
+    elif action == 'hien_tin':
+        tin.hoat_dong = True
+        tin.save()
+        messages.success(request, f"Đã cho hiện tin: {tin.tieu_de}")
+
+    # Xử lý xong thì quay lại trang chi tiết của tin đó
+    return redirect('quan_tri:chi_tiet_tin_dang', pk=pk)
+
+@quantri_required
+def toggle_hoat_dong_tin_dang_view(request, pk):
+    """
+    Toggle trạng thái hoat_dong (Hiện/Ẩn) của tin đăng.
+    """
+    tin = get_object_or_404(TinDang, pk=pk)
+
+    if request.method == 'POST':
+        # Đảo ngược trạng thái hiện tại
+        tin.hoat_dong = not tin.hoat_dong
+        tin.save()
+        
+        trang_thai_moi = "đang hiển thị" if tin.hoat_dong else "đã bị ẩn"
+        messages.success(request, f"Đã cập nhật tin '{tin.tieu_de}' thành {trang_thai_moi}.")
+        
+    return redirect('quan_tri:quan_ly_tin_dang')
