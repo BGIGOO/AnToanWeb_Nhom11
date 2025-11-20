@@ -100,7 +100,7 @@ class TinDang(models.Model):
     doi_tuong = models.ManyToManyField(DoiTuong, blank=True)
 
     # === Trạng thái & Thời gian ===
-    trang_thai_duyet = models.BooleanField(default=False)
+    trang_thai_duyet = models.BooleanField(null=True, default=None) # None = Chưa duyệt, True = Duyệt, False = Không duyệt
     hoat_dong = models.BooleanField(default=True)
     
     # ngay_tao (default: `now()`) -> auto_now_add=True

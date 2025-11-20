@@ -85,7 +85,35 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">...</svg>
                             <span>Quản lý Khách hàng</span>
                         </a>
+
                     </li>
+
+                    <li>
+                        <a href="{% url 'quan_tri:quan_ly_bao_cao' %}" 
+                        class="flex items-center space-x-3 rounded-lg p-3 font-medium transition-colors
+                                {% if request.resolver_match.url_name == 'quan_ly_bao_cao' or request.resolver_match.url_name == 'sua_khach_hang' %}
+                                    bg-highlight text-button-text
+                                {% else %}
+                                    text-paragraph hover:bg-gray-100
+                                {% endif %}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">...</svg>
+                            <span>Quản lý Báo cáo</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'quan_tri:quan_ly_bao_cao' %}" 
+                        class="flex items-center space-x-3 rounded-lg p-3 font-medium transition-colors
+                                {% if request.resolver_match.url_name == 'quan_ly_bao_cao' or request.resolver_match.url_name == 'sua_khach_hang' %}
+                                    bg-highlight text-button-text
+                                {% else %}
+                                    text-paragraph hover:bg-gray-100
+                                {% endif %}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">...</svg>
+                            <span>Thống Kê</span>
+                        </a>
+                    </li>
+
                 </ul>
             </nav>
 

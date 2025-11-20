@@ -81,7 +81,7 @@
     <table class="w-full text-left min-w-[1200px]">
         <thead class="border-b-2 border-gray-200">
             <tr>
-                <th class="py-3 px-4 w-12 font-semibold text-headline">STT</th>
+                <th class="py-3 px-4 w-12 font-semibold text-headline">ID</th>
                 <th class="py-3 px-4 font-semibold text-headline w-1/4">Tiêu đề</th> 
                 <th class="py-3 px-4 font-semibold text-headline">Chủ trọ</th>         
                 <th class="py-3 px-4 font-semibold text-headline">Ngày đăng</th>      
@@ -95,7 +95,7 @@
             {% for tin in ds_tin_dang %}
             <tr class="border-b border-gray-100 hover:bg-gray-50">
                 
-                <td class="py-3 px-4 text-paragraph align-top">{{ forloop.counter }}</td>
+                <td class="py-3 px-4 text-paragraph align-top">{{ tin.id }}</td>
 
                 <td class="py-3 px-4 align-top">
                     <div class="flex space-x-3">

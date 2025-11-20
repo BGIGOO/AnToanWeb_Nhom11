@@ -1,0 +1,306 @@
+{% extends 'phongtro/quan_tri/base.html' %}
+
+{% block title %}Quản lý Báo cáo{% endblock %}
+
+{% block header_title %}Quản lý Báo cáo Vi phạm{% endblock %}
+
+{% block content %}
+
+<form method="POST" action="{% url 'quan_tri:xu_ly_bao_cao' %}" id="bulkForm">
+    {% csrf_token %}
+
+    <details class="group mb-6 bg-main rounded-lg shadow-sm border border-gray-200 overflow-hidden open:ring-1 open:ring-secondary/30"
+             {% if tim_email or tim_ho_ten or tim_tin_id or tim_sdt_zalo or loc_trang_thai %}open{% endif %}>
+        
+        <summary class="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors select-none">
+            <div class="flex items-center space-x-2 text-headline font-semibold">
+                <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <span>Bộ lọc & Tìm kiếm</span>
+                
+                {% if tim_email or tim_ho_ten or tim_tin_id or tim_sdt_zalo or loc_trang_thai %}
+                    <span class="ml-2 px-2 py-0.5 text-xs bg-highlight text-white rounded-full">Đang lọc</span>
+                {% endif %}
+            </div>       
+            <svg class="w-5 h-5 text-paragraph transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </summary>
+        
+        <div class="p-4 border-t border-gray-200 bg-white">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                
+                <div>
+                    <label class="block text-xs font-medium text-paragraph mb-1 ml-1">Email (Báo cáo/Chủ trọ)</label>
+                    <input type="text" name="tim_email" value="{{ tim_email|default:'' }}" 
+                           placeholder="Nhập email..."
+                           class="w-full px-3 py-1.5 text-sm border border-secondary rounded focus:outline-none focus:ring-1 focus:ring-highlight"
+                           form="searchForm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-paragraph mb-1 ml-1">Họ tên (Người báo cáo)</label>
+                    <input type="text" name="tim_ho_ten" value="{{ tim_ho_ten|default:'' }}" 
+                           placeholder="Nhập họ tên..."
+                           class="w-full px-3 py-1.5 text-sm border border-secondary rounded focus:outline-none focus:ring-1 focus:ring-highlight"
+                           form="searchForm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-paragraph mb-1 ml-1">ID Tin bị báo cáo</label>
+                    <input type="number" name="tim_tin_id" value="{{ tim_tin_id|default:'' }}" 
+                           placeholder="VD: 15"
+                           class="w-full px-3 py-1.5 text-sm border border-secondary rounded focus:outline-none focus:ring-1 focus:ring-highlight"
+                           form="searchForm">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-medium text-paragraph mb-1 ml-1">SĐT / Zalo</label>
+                    <input type="text" name="tim_sdt_zalo" value="{{ tim_sdt_zalo|default:'' }}" 
+                           placeholder="Số điện thoại..."
+                           class="w-full px-3 py-1.5 text-sm border border-secondary rounded focus:outline-none focus:ring-1 focus:ring-highlight"
+                           form="searchForm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-paragraph mb-1 ml-1">Trạng thái</label>
+                    <select name="loc_trang_thai" class="w-full px-3 py-1.5 text-sm border border-secondary rounded focus:outline-none focus:ring-1 focus:ring-highlight bg-white" form="searchForm">
+                        <option value="">- Tất cả -</option>
+                        <option value="cho_xu_ly" {% if loc_trang_thai == 'cho_xu_ly' %}selected{% endif %}>Chờ xử lý</option>
+                        <option value="da_xu_ly" {% if loc_trang_thai == 'da_xu_ly' %}selected{% endif %}>Đã xử lý</option>
+                        <option value="bo_qua" {% if loc_trang_thai == 'bo_qua' %}selected{% endif %}>Bỏ qua</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-5 flex justify-end space-x-2 mt-2">
+                    {% if tim_email or tim_ho_ten or tim_tin_id or tim_sdt_zalo or loc_trang_thai %}
+                        <a href="{% url 'quan_tri:quan_ly_bao_cao' %}" class="bg-gray-100 text-paragraph border border-gray-300 px-4 py-1.5 rounded text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center" title="Xóa bộ lọc">
+                            Xóa lọc
+                        </a>
+                    {% endif %}
+                    
+                    <button type="submit" form="searchForm" class="bg-button text-button-text px-6 py-1.5 rounded text-sm font-medium hover:bg-highlight transition-colors shadow-sm flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <div class="flex justify-between items-center mb-2 px-1">
+        <div class="text-sm text-paragraph italic">
+            {# ĐÃ CHỈNH SỬA: Hiển thị thông tin trang hiện tại #}
+            {% if paginator.count > 0 %}
+                Hiển thị {{ page_obj.start_index }}-{{ page_obj.end_index }} trong tổng số {{ paginator.count }} kết quả
+            {% else %}
+                Hiển thị 0 kết quả
+            {% endif %}
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-paragraph font-medium uppercase tracking-wide">Đổi trạng thái:</span>
+            <button type="submit" name="action" value="da_xu_ly" class="px-3 py-1.5 bg-green-100 text-green-700 rounded border border-green-200 text-xs font-bold hover:bg-green-200 transition-colors flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                ĐÃ XỬ LÝ
+            </button>
+            <button type="submit" name="action" value="bo_qua" class="px-3 py-1.5 bg-pink-100 text-pink-700 rounded border border-pink-200 text-xs font-bold hover:bg-pink-200 transition-colors flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                BỎ QUA
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-main p-6 rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+        <table class="w-full text-left min-w-[1100px]">
+            <thead class="border-b-2 border-gray-200 bg-gray-50/50">
+                <tr>
+                    <th class="py-3 px-4 font-semibold text-headline">STT</th>
+                    <th class="py-3 px-4 font-semibold text-headline">Người báo cáo</th>
+                    <th class="py-3 px-4 font-semibold text-headline w-1/5">Tin bị báo cáo</th>
+                    <th class="py-3 px-4 font-semibold text-headline w-32">ID Tin</th>
+                    <th class="py-3 px-4 font-semibold text-headline">Chủ trọ</th> 
+                    <th class="py-3 px-4 font-semibold text-headline w-1/5">Lý do</th>
+                    <th class="py-3 px-4 font-semibold text-headline w-28">Thời gian</th>
+                    <th class="py-3 px-4 font-semibold text-headline text-center w-28">Trạng thái</th>
+                    <th class="py-3 px-4 w-10 text-center">
+                        <input type="checkbox" onclick="toggleAll(this)" class="rounded border-gray-300 text-highlight focus:ring-highlight">
+                    </th>                  
+                </tr>
+            </thead>
+            <tbody>
+                {% for bao_cao in ds_bao_cao %}
+                {# ĐÃ CHỈNH SỬA: Tăng độ đậm của đường viền và thêm hover #}
+                <tr class="border-b-2 border-gray-200 hover:bg-gray-50 transition-colors">   
+                    {# ĐÃ CHỈNH SỬA: Tính STT dựa trên số trang #}
+                    <td class="py-4 px-4 text-paragraph align-top">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                    
+                    <td class="py-4 px-4 align-top">
+                        <div class="font-medium text-headline">{{ bao_cao.nguoi_bao_cao_id.ho_ten }}</div>
+                        <div class="text-xs text-paragraph">{{ bao_cao.nguoi_bao_cao_id.email }}</div>
+                        <div class="text-xs text-gray-400 mt-1">{{ bao_cao.nguoi_bao_cao_id.so_dien_thoai }}</div>
+                    </td>
+
+                    <td class="py-4 px-4 align-top">
+                        <a href="{% url 'quan_tri:chi_tiet_tin_dang' pk=bao_cao.tin_dang_id.pk %}" class="text-highlight font-medium hover:underline mb-1 block" title="{{ bao_cao.tin_dang_id.tieu_de }}">
+                            {{ bao_cao.tin_dang_id.tieu_de|truncatechars:25 }}
+                        </a>
+                    </td>
+
+                    <td class="py-4 px-4 align-top">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200">
+                            ID: {{ bao_cao.tin_dang_id.pk }}
+                        </span>
+                    </td>
+
+                    <td class="py-4 px-4 align-top">
+                        <div class="font-medium text-headline">{{ bao_cao.tin_dang_id.chu_tro_id.ho_ten }}</div>
+                        <div class="text-xs text-paragraph">{{ bao_cao.tin_dang_id.chu_tro_id.email }}</div>
+                         <a href="{% url 'quan_tri:sua_chu_tro' pk=bao_cao.tin_dang_id.chu_tro_id.pk %}" class="text-[10px] text-secondary hover:underline mt-1 inline-block">
+                            Xem hồ sơ
+                        </a>
+                    </td>
+
+                    <td class="py-4 px-4 align-top">
+                        <div class="text-paragraph text-sm relative group">
+                            <p>{{ bao_cao.ly_do|truncatechars:40 }}</p>
+                            
+                            {# ĐÃ CHỈNH SỬA: Dùng |length > 40 để kiểm tra #}
+                            {% if bao_cao.ly_do|length > 40 %}
+                                <button type="button" onclick="openModal('modal-{{ bao_cao.pk }}')" class="text-xs text-highlight hover:underline mt-1 font-medium flex items-center">
+                                    Xem đầy đủ
+                                </button>
+                            {% endif %}
+                            
+                            <div id="modal-{{ bao_cao.pk }}" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="if(event.target === this) closeModal('modal-{{ bao_cao.pk }}')">
+                                <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full mx-4 relative animate-fade-in">
+                                    <h3 class="font-bold text-lg mb-4 text-headline">Chi tiết lý do báo cáo</h3>
+                                    <div class="bg-gray-50 p-4 rounded border border-gray-200 text-paragraph text-sm whitespace-pre-line max-h-96 overflow-y-auto">
+                                        {{ bao_cao.ly_do }}
+                                    </div>
+                                    <div class="mt-6 flex justify-end">
+                                        <button type="button" onclick="closeModal('modal-{{ bao_cao.pk }}')" class="bg-gray-200 hover:bg-gray-300 text-paragraph px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            Đóng
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="py-4 px-4 align-top text-sm text-paragraph">
+                        <div>{{ bao_cao.ngay_tao|date:"d/m/Y" }}</div>
+                        <div class="text-xs text-gray-400">{{ bao_cao.ngay_tao|date:"H:i" }}</div>
+                    </td>
+
+                    <td class="py-4 px-4 align-top text-center">
+                        {% if bao_cao.trang_thai == 'cho_xu_ly' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></span>
+                                Chờ xử lý
+                            </span>
+                        {% elif bao_cao.trang_thai == 'da_xu_ly' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                Đã xử lý
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200">
+                                Bỏ qua
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="py-4 px-4 text-center align-top pt-4">
+                        <input type="checkbox" name="report_ids" value="{{ bao_cao.pk }}" class="rounded border-gray-300 text-highlight focus:ring-highlight report-checkbox">
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="py-12 text-center text-paragraph">
+                        <div class="flex flex-col items-center justify-center opacity-60">
+                            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <p>Không có báo cáo nào phù hợp.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+{# BẮT ĐẦU KHỐI PHÂN TRANG #}
+{% if page_obj.has_other_pages %}
+<div class="flex justify-between items-center mt-6">
+    <span class="text-sm text-paragraph font-medium">
+        Trang {{ page_obj.number }} / {{ paginator.num_pages }}
+    </span>
+
+    <nav class="flex space-x-2">
+        {% if page_obj.has_previous %}
+            {# Giữ lại các tham số lọc khi chuyển trang #}
+            <a href="?page={{ page_obj.previous_page_number }}&tim_email={{ tim_email|urlencode }}&tim_ho_ten={{ tim_ho_ten|urlencode }}&tim_tin_id={{ tim_tin_id|urlencode }}&tim_sdt_zalo={{ tim_sdt_zalo|urlencode }}&loc_trang_thai={{ loc_trang_thai }}"
+               class="px-4 py-2 text-sm font-medium text-paragraph bg-gray-100 rounded hover:bg-gray-200 transition-colors border border-gray-200">
+                Trang trước
+            </a>
+        {% else %}
+            <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 rounded cursor-not-allowed border border-gray-100">
+                Trang trước
+            </span>
+        {% endif %}
+
+        {# Nút số trang hiện tại #}
+        <span class="px-4 py-2 text-sm font-bold text-white bg-highlight rounded border border-highlight">
+            {{ page_obj.number }}
+        </span>
+
+        {% if page_obj.has_next %}
+            {# Giữ lại các tham số lọc khi chuyển trang #}
+            <a href="?page={{ page_obj.next_page_number }}&tim_email={{ tim_email|urlencode }}&tim_ho_ten={{ tim_ho_ten|urlencode }}&tim_tin_id={{ tim_tin_id|urlencode }}&tim_sdt_zalo={{ tim_sdt_zalo|urlencode }}&loc_trang_thai={{ loc_trang_thai }}"
+               class="px-4 py-2 text-sm font-medium text-paragraph bg-gray-100 rounded hover:bg-gray-200 transition-colors border border-gray-200">
+                Trang sau
+            </a>
+        {% else %}
+            <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 rounded cursor-not-allowed border border-gray-100">
+                Trang sau
+            </span>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{# KẾT THÚC KHỐI PHÂN TRANG #}
+
+
+<form id="searchForm" method="GET" action="{% url 'quan_tri:quan_ly_bao_cao' %}"></form>
+
+<script>
+    // 1. Chọn tất cả checkbox
+    function toggleAll(source) {
+        checkboxes = document.getElementsByName('report_ids');
+        for(var i=0, n=checkboxes.length;i<n;i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+
+    // 2. Xử lý Modal (Popup)
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.getElementById(modalId).classList.add('flex');
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById(modalId).classList.remove('flex');
+    }
+</script>
+
+<style>
+    /* Animation nhẹ cho modal */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.2s ease-out forwards;
+    }
+</style>
+
+{% endblock %}

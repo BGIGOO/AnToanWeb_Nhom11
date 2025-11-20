@@ -52,4 +52,13 @@ urlpatterns = [
     path('tin_dang/duyet/<int:pk>/', 
          quan_tri_views.duyet_tin_dang_view, 
          name='duyet_tin_dang'),
+
+    path('quan_ly_bao_cao/', 
+         quan_tri_views.quan_ly_bao_cao_view, 
+         name='quan_ly_bao_cao'),
+         
+    # 2. Action xử lý (POST only)
+    path('xu_ly_bao_cao/', 
+         quan_tri_views.xu_ly_bao_cao_view, 
+         name='xu_ly_bao_cao'),
 ]

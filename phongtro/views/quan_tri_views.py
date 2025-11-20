@@ -2,10 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
+from django.core.paginator import Paginator # <-- ĐÃ THÊM: Import Paginator
 
 from users.models import NguoiDung
-from phongtro.models import TinDang
+from phongtro.models import TinDang, BaoCao
 from phongtro.forms.quan_tri_forms import ChuTroChangeForm
     # from phongtro.forms.quan_tri_forms import KhachHangChangeForm
 from phongtro.decorators import quantri_required
@@ -308,3 +309,116 @@ def toggle_hoat_dong_tin_dang_view(request, pk):
         messages.success(request, f"Đã cập nhật tin '{tin.tieu_de}' thành {trang_thai_moi}.")
         
     return redirect('quan_tri:quan_ly_tin_dang')
+
+@quantri_required
+def quan_ly_bao_cao_view(request):
+    """
+    Hiển thị danh sách báo cáo vi phạm với bộ lọc chi tiết, có phân trang và sắp xếp ưu tiên.
+    """
+    # Eager load để tối ưu query
+    ds_bao_cao = BaoCao.objects.select_related('nguoi_bao_cao_id', 'tin_dang_id', 'tin_dang_id__chu_tro_id')
+
+    # --- Lấy tham số lọc MỚI ---
+    tim_email = request.GET.get('tim_email', '').strip()
+    tim_ho_ten = request.GET.get('tim_ho_ten', '').strip()
+    tim_tin_id = request.GET.get('tim_tin_id', '').strip()
+    tim_sdt_zalo = request.GET.get('tim_sdt_zalo', '').strip()
+    loc_trang_thai = request.GET.get('loc_trang_thai', '').strip()
+    page_number = request.GET.get('page') # Lấy tham số trang hiện tại
+
+    # (Các bước lọc giữ nguyên)
+    # 1. Lọc theo Email (Tìm trong cả người báo cáo VÀ chủ trọ của tin bị báo)
+    if tim_email:
+        ds_bao_cao = ds_bao_cao.filter(
+            Q(nguoi_bao_cao_id__email__icontains=tim_email) |
+            Q(tin_dang_id__chu_tro_id__email__icontains=tim_email)
+        )
+
+    # 2. Lọc theo Họ tên (Người báo cáo)
+    if tim_ho_ten:
+        ds_bao_cao = ds_bao_cao.filter(nguoi_bao_cao_id__ho_ten__icontains=tim_ho_ten)
+
+    # 3. Lọc theo ID tin bị báo cáo
+    if tim_tin_id:
+        try:
+            tin_id = int(tim_tin_id)
+            ds_bao_cao = ds_bao_cao.filter(tin_dang_id__pk=tin_id)
+        except ValueError:
+            pass # Nếu nhập chữ vào ô ID thì bỏ qua
+
+    # 4. Lọc theo SĐT/Zalo (Người báo cáo)
+    if tim_sdt_zalo:
+        ds_bao_cao = ds_bao_cao.filter(
+            Q(nguoi_bao_cao_id__so_dien_thoai__icontains=tim_sdt_zalo) |
+            Q(nguoi_bao_cao_id__so_zalo__icontains=tim_sdt_zalo)
+        )
+
+    # 5. Lọc theo Trạng thái
+    if loc_trang_thai:
+        ds_bao_cao = ds_bao_cao.filter(trang_thai=loc_trang_thai)
+
+    # --- ĐÃ CHỈNH SỬA: LOGIC SẮP XẾP ƯU TIÊN THEO TRẠNG THÁI ---
+    # Gán số ưu tiên cho từng trạng thái: 1 (Chờ xử lý), 2 (Đã xử lý), 3 (Bỏ qua)
+    ds_bao_cao = ds_bao_cao.annotate(
+        trang_thai_order=Case(
+            When(trang_thai=BaoCao.TrangThai.CHO_XU_LY, then=Value(1)),
+            When(trang_thai=BaoCao.TrangThai.DA_XU_LY, then=Value(2)),
+            When(trang_thai=BaoCao.TrangThai.BO_QUA, then=Value(3)),
+            output_field=IntegerField()
+        )
+    ).order_by('trang_thai_order', '-ngay_tao') # Sắp xếp theo thứ tự ưu tiên, rồi đến thời gian mới nhất
+    # ----------------------------------------------------------------------
+
+
+    # --- PHÂN TRANG (PAGINATION) ---
+    # 6 báo cáo mỗi trang theo yêu cầu
+    paginator = Paginator(ds_bao_cao, 6) 
+
+    try:
+        page_obj = paginator.page(page_number)
+    except Exception:
+        # Nếu trang không tồn tại, hiển thị trang đầu tiên
+        page_obj = paginator.page(1)
+    
+    # Ghi đè ds_bao_cao bằng danh sách đã được phân trang của trang hiện tại
+    ds_bao_cao = page_obj.object_list
+    
+    context = {
+        'user': request.user,
+        'ds_bao_cao': ds_bao_cao, # Danh sách báo cáo của trang hiện tại
+        'page_obj': page_obj,     # Đối tượng trang (có thông tin next/prev)
+        'paginator': paginator,   # Đối tượng Paginator
+        # Truyền lại giá trị form
+        'tim_email': tim_email,
+        'tim_ho_ten': tim_ho_ten,
+        'tim_tin_id': tim_tin_id,
+        'tim_sdt_zalo': tim_sdt_zalo,
+        'loc_trang_thai': loc_trang_thai,
+        'TrangThai': BaoCao.TrangThai, 
+    }
+    return render(request, 'phongtro/quan_tri/quan_ly_bao_cao.html', context)
+
+# ---
+# View MỚI: Xử lý Trạng thái Báo cáo (Action)
+# ---
+@quantri_required
+def xu_ly_bao_cao_view(request):
+    """
+    Xử lý đổi trạng thái cho 1 hoặc nhiều báo cáo cùng lúc.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    # Lấy danh sách ID các báo cáo được chọn (từ checkbox)
+    report_ids = request.POST.getlist('report_ids')
+    action = request.POST.get('action') # 'cho_xu_ly', 'da_xu_ly', 'bo_qua'
+
+    if not report_ids or not action:
+        messages.error(request, "Vui lòng chọn ít nhất một báo cáo và hành động.")
+        return redirect('quan_tri:quan_ly_bao_cao')
+
+    # Cập nhật hàng loạt (Bulk Update)
+    so_luong = BaoCao.objects.filter(pk__in=report_ids).update(trang_thai=action)
+    
+    messages.success(request, f"Đã cập nhật trạng thái cho {so_luong} báo cáo.")
+    return redirect('quan_tri:quan_ly_bao_cao')
